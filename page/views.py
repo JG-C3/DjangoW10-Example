@@ -1,10 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Posting, Comment
 from .forms import PostingForm, CommentForm
-# [코드 작성] django.contrib.auth.decorators 에서 login_required 데코레이션 추가
-from django.contrib.auth.decorators import login_required
-# [코드 작성] django.views.decorators.http 에서 require_POST 데코레이션 추가
-from django.views.decorators.http import require_POST
 
 # Create your views here.
 def index(request):
@@ -70,8 +66,6 @@ def posting_detail(request, posting_id):
     return render(request, 'page/posting_detail.html', context)
 
 # [Update] 작성글 수정
-# [코드 작성] login_required 데코레이션 추가
-@login_required
 def posting_update(request, posting_id):
     posting = get_object_or_404(Posting, id=posting_id)
     # [코드 작성] 글(posting) 작성자(author)가 로그인한 사람(request.user)과 같을 경우에만 글 수정이 가능하도록 조건문 작성
@@ -95,28 +89,12 @@ def posting_update(request, posting_id):
     return redirect('page:posting_detail', posting_id)
 
 # [Delete] 작성글 삭제
-# [코드 작성] login_required 데코레이션 추가
-@login_required
-# [코드 작성] require_POST 데코레이션 추가
-@require_POST
 def posting_delete(request, posting_id):
-    posting = get_object_or_404(Posting, id=posting_id)
-    # [코드 작성] 글(posting) 작성자(author)가 로그인한 사람(request.user)과 같을 경우에만 글 수정이 가능하도록 조건문 작성
-    if posting.author == request.user:
-        posting.delete()
-        return redirect('page:posting_list')
-    # [코드 작성] posting_id에 해당하는 페이지로 redirect
-    return redirect('page:posting_detail', posting_id)
+    posting = get_object_or_404(Posting, id=posting_id)    
+    posting.delete()
+    return redirect('page:posting_list')    
 
 # [Delete] 댓글 삭제
-# [코드 작성] login_required 데코레이션 추가
-@login_required
-# [코드 작성] require_POST 데코레이션 추가
-@require_POST
 def comment_delete(request, posting_id, comment_id):
-    comment = get_object_or_404(Comment, id=comment_id)
-    # [코드 작성] 댓글(comment) 작성자(author)가 로그인한 사람(request.user)과 같을 경우에만 글 수정이 가능하도록 조건문 작성
-    if comment.author == request.user:
-        comment.delete()
-    # [코드 작성] posting_id에 해당하는 페이지로 redirect
-    return redirect('page:posting_detail', posting_id)
+    comment = get_object_or_404(Comment, id=comment_id)    
+    comment.delete()
