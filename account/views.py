@@ -12,6 +12,7 @@ def signup(request):
     else:
         form = UserCreationForm()
     context = {
+        # [코드 작성] 화면에 '회원가입' 임을 알려줄 수 있도록 type 전달
         'type': '회원가입',
         'form': form,
     }
@@ -31,6 +32,7 @@ def login(request):
     }
     return render(request, 'account/form.html', context)
 
+# [코드 작성] auth_logout 함수를 이용한 로그아웃 기능 구현
 def logout(request):
     auth_logout(request)
     return redirect('page:index')
