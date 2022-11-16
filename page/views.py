@@ -1,8 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Posting, Comment
 from .forms import PostingForm, CommentForm
-# [코드 작성] login_required 데코레이션 추가
+# [코드 작성] django.contrib.auth.decorators 에서 login_required 데코레이션 추가
 from django.contrib.auth.decorators import login_required
+# [코드 작성] django.views.decorators.http 에서 require_POST 데코레이션 추가
+from django.views.decorators.http import require_POST
 
 # Create your views here.
 def index(request):
@@ -25,6 +27,7 @@ def posting_create(request):
             
             if posting_form.is_valid():
                 # [코드 작성] posting_form에 작성자 객체 추가
+                # [코드 작성] posting_form의 author에 작성자 객체 추가
                 posting_form = posting_form.save(commit=False)
                 posting_form.author = request.user
                 posting_form.save()
@@ -71,7 +74,7 @@ def posting_detail(request, posting_id):
 @login_required
 def posting_update(request, posting_id):
     posting = get_object_or_404(Posting, id=posting_id)
-    # [코드 작성] 글 작성자가 로그인한 사람과 같을 경우에만 글 수정이 가능하도록 조건문 작성
+    # [코드 작성] 글(posting) 작성자(author)가 로그인한 사람(request.user)과 같을 경우에만 글 수정이 가능하도록 조건문 작성
     if posting.author == request.user:
         if request.method == 'POST':
             posting_form = PostingForm(request.POST, instance=posting)
@@ -88,24 +91,32 @@ def posting_update(request, posting_id):
             'posting_form': posting_form,
         }
         return render(request, 'page/posting_form.html', context)
-    # [코드 추가] posting_id에 해당하는 페이지로 redirect
+    # [코드 작성] posting_id에 해당하는 페이지로 redirect
     return redirect('page:posting_detail', posting_id)
 
 # [Delete] 작성글 삭제
 # [코드 작성] login_required 데코레이션 추가
 @login_required
+# [코드 작성] require_POST 데코레이션 추가
+@require_POST
 def posting_delete(request, posting_id):
-    if request.method == 'POST':
-        posting = get_object_or_404(Posting, id=posting_id)
+    posting = get_object_or_404(Posting, id=posting_id)
+    # [코드 작성] 글(posting) 작성자(author)가 로그인한 사람(request.user)과 같을 경우에만 글 수정이 가능하도록 조건문 작성
+    if posting.author == request.user:
         posting.delete()
         return redirect('page:posting_list')
+    # [코드 작성] posting_id에 해당하는 페이지로 redirect
     return redirect('page:posting_detail', posting_id)
 
 # [Delete] 댓글 삭제
 # [코드 작성] login_required 데코레이션 추가
 @login_required
+# [코드 작성] require_POST 데코레이션 추가
+@require_POST
 def comment_delete(request, posting_id, comment_id):
-    if request.method == 'POST':
-        comment = get_object_or_404(Comment, id=comment_id)
+    comment = get_object_or_404(Comment, id=comment_id)
+    # [코드 작성] 댓글(comment) 작성자(author)가 로그인한 사람(request.user)과 같을 경우에만 글 수정이 가능하도록 조건문 작성
+    if comment.author == request.user:
         comment.delete()
-        return redirect('page:posting_detail', posting_id)
+    # [코드 작성] posting_id에 해당하는 페이지로 redirect
+    return redirect('page:posting_detail', posting_id)

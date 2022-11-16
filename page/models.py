@@ -19,6 +19,9 @@ class Comment(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     # [코드 추가] 작성자를 저장하는 필드 추가
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='comments')
-
+    
     def __str__(self):
-        return f'{self.posting.title} - {self.content[:10]}...'
+        if len(self.content) <= 10:
+            return f'{self.posting.title} - {self.content}'
+        else:
+            return f'{self.posting.title} - {self.content[:10]}...'
